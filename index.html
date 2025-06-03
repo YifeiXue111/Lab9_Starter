@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lab 9</title>
-  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
-  <script>
-    window.TrackJS && TrackJS.install({
-      token: "85767f46769046a8aa97448f45866ba9",
-    });
-  </script>
+
   <style>
-    button { margin: 3px; }
-    button:hover { cursor: pointer; }
-    #first-num, #second-num { width: 60px; }
+    button {
+      margin: 3px;
+    }
+
+    button:hover {
+      cursor: pointer;
+    }
+
+    #first-num,
+    #second-num {
+      width: 60px;
+    }
+
     output {
       border: 1px solid gray;
       display: block;
@@ -23,7 +29,11 @@
       padding: 5px;
       width: 240px;
     }
-    main { width: 800px; }
+
+    main {
+      width: 800px;
+    }
+
     #error-btns {
       column-gap: 5px;
       display: flex;
@@ -31,12 +41,22 @@
       margin-top: 30px;
       row-gap: 5px;
     }
-    #error-btns > * {
+
+    #error-btns>* {
       padding: 8px 2px;
       width: 122px;
     }
   </style>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "85767f46769046a8aa97448f45866ba9"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
+                          
 </head>
+
 <body>
   <main>
     <form>
@@ -73,30 +93,14 @@
       <button>Trigger a Global Error</button>
     </section>
   </main>
-  <script>
-    const sampleData = {
-      name: "ABC DEFG",
-      age: 0,
-      hobbies: ["reading", "gaming", "coding"]
-    };
-    const sampleArray = [
-      { id: 1, item: "Apple", price: 0.99 },
-      { id: 2, item: "Banana", price: 0.59 },
-      { id: 3, item: "Orange", price: 0.79 }
-    ];
 
-    class CalculatorError extends Error {
-      constructor(message, errorCode) {
+  <script>
+    class SyntaxError extends Error {
+      constructor(message) {
         super(message);
-        this.name = "CalculatorError";
-        this.errorCode = errorCode;
+        this.name = "SyntaxError";
       }
     }
-
-    window.onerror = function (message, source, lineno, colno, error) {
-      console.log(`Global Error: ${message} at ${source}:${lineno}:${colno}`);
-      return true;
-    };
 
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
@@ -105,109 +109,91 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-
+  
+      if (isNaN(firstNum) || isNaN(secondNum)) {
+          throw new SyntaxError('Invalid or unexpected token');
+      }
       try {
-        if (!firstNum || !secondNum) {
-          throw new CalculatorError("Inputs cannot be empty", 400);
-        }
-        if (isNaN(firstNum) || isNaN(secondNum)) {
-          throw new CalculatorError("Inputs must be numbers", 400);
-        }
-        if (operator === "/" && Number(secondNum) === 0) {
-          throw new CalculatorError("Division by zero is not allowed", 400);
-        }
-        let result;
-        switch (operator) {
-          case "+":
-            result = Number(firstNum) + Number(secondNum);
-            break;
-          case "-":
-            result = Number(firstNum) - Number(secondNum);
-            break;
-          case "*":
-            result = Number(firstNum) * Number(secondNum);
-            break;
-          case "/":
-            result = Number(firstNum) / Number(secondNum);
-            break;
-          default:
-            throw new CalculatorError("Invalid operator", 400);
-        }
-        output.innerHTML = result;
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
       } catch (error) {
-        console.error(`${error.name}: ${error.message} (Code: ${error.errorCode})`);
-        output.innerHTML = `Error: ${error.message}`;
-      } finally {
-        console.log("Calculation attempt completed.");
+        console.error(error);
+      } finally{
+        console.log("finshed");
       }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
-    errorBtns.forEach(button => {
-      button.addEventListener('click', () => {
-        const buttonText = button.textContent;
+    // Start your code here
+    // You may move this JS to another file if you wish
+    let logBtn = errorBtns[0];
+    logBtn.addEventListener('click', () => console.log('Console Log Demo'));
 
-        switch (buttonText) {
-          case "Console Log":
-            console.log("Sample Data:", sampleData);
-            break;
-          case "Console Error":
-            console.error("This is a console.error message: Operation failed!");
-            break;
-          case "Console Count":
-            console.count("Button Click Count");
-            break;
-          case "Console Warn":
-            console.warn("This is a console.warn message: Proceed with caution!");
-            break;
-          case "Console Assert":
-            const condition = false;
-            console.assert(condition, "Assertion failed: Condition is false!");
-            break;
-          case "Console Clear":
-            console.clear();
-            break;
-          case "Console Dir":
-            console.dir(sampleData);
-            break;
-          case "Console dirxml":
-            const mainElement = document.querySelector("main");
-            console.dirxml(mainElement);
-            break;
-          case "Console Group Start":
-            console.group("Calculator Info");
-            console.log("Operation:", document.querySelector('#operator').value);
-            console.log("Inputs:", document.querySelector('#first-num').value, document.querySelector('#second-num').value);
-            break;
-          case "Console Group End":
-            console.groupEnd();
-            break;
-          case "Console Table":
-            console.table(sampleArray);
-            break;
-          case "Start Timer":
-            console.time("CalculationTimer");
-            for (let i = 0; i < 100000; i++) {}
-            break;
-          case "End Timer":
-            console.timeEnd("CalculationTimer");
-            break;
-          case "Console Trace":
-            function innerCalc() {
-              console.trace("Trace from calculation function");
-            }
-            function outerCalc() {
-              innerCalc();
-            }
-            outerCalc();
-            break;
-          case "Trigger a Global Error":
-            undefinedVariable.accessProperty;
-            break;
-        }
-      });
+    let errorBtn = errorBtns[1];
+    errorBtn.addEventListener('click', () => console.error('Console Error Demo'));
+
+    let countBtn = errorBtns[2];
+    countBtn.addEventListener('click', () => console.count('Count Button'));
+
+    let warnBtn = errorBtns[3];
+    warnBtn.addEventListener('click', () => console.warn('Console Warn Button'));
+
+    const number = 2;
+    const errorMsg = 'The number does not equal 3';
+    let assertBtn = errorBtns[4];
+    assertBtn.addEventListener('click', () => console.assert(number == 3, {number, errorMsg}));
+
+    let clearBtn = errorBtns[5];
+    clearBtn.addEventListener('click', () => console.clear());
+
+    let dirBtn = errorBtns[6];
+    dirBtn.addEventListener('click', () => console.dir(dirBtn));
+
+    let dirxmlBtn = errorBtns[7];
+    dirxmlBtn.addEventListener('click', () => console.dirxml(dirxmlBtn));
+
+    let groupStartBtn = errorBtns[8];
+    groupStartBtn.addEventListener('click', () => {
+      console.group('console.group');
     });
+
+    let groupEndBtn = errorBtns[9];
+    groupEndBtn.addEventListener('click', () => console.groupEnd());
+
+    let tableBtn = errorBtns[10];
+    tableBtn.addEventListener('click', () => console.table([{ name: 'math', num: 150 }, { name: 'cse110', num: 110 }]));
+
+    let startTimerBtn = errorBtns[11];
+    startTimerBtn.addEventListener('click', () => console.time('Timer Button'));
+
+    let endTimerBtn = errorBtns[12];
+    endTimerBtn.addEventListener('click', () => console.timeEnd('Timer Button'));
+
+    
+    let traceBtn = errorBtns[13];
+    traceBtn.addEventListener('click', function handleBtnClick(){deep();});
+    
+    function deep() {
+      function deeper() {
+        function deepest() {
+          console.trace('console.trace');
+        }
+        deepest();
+      }
+      deeper();
+    }
+    
+    let globalErrorBtn = errorBtns[14];
+    globalErrorBtn.addEventListener('click', () => {
+      throw new ReferenceError('Trigger a Global Error');
+    });
+
+    window.onerror = function() {
+      console.log("Error");
+      TrackJS.track('Testing TrackJS!');
+    };
+
   </script>
 </body>
+
 </html>
