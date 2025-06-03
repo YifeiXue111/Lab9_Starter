@@ -1,26 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lab 9</title>
-
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+    window.TrackJS && TrackJS.install({
+      token: "85767f46769046a8aa97448f45866ba9"
+    });
+  </script>
   <style>
-    button {
-      margin: 3px;
-    }
-
-    button:hover {
-      cursor: pointer;
-    }
-
-    #first-num,
-    #second-num {
-      width: 60px;
-    }
-
+    button { margin: 3px; }
+    button:hover { cursor: pointer; }
+    #first-num, #second-num { width: 60px; }
     output {
       border: 1px solid gray;
       display: block;
@@ -29,11 +23,7 @@
       padding: 5px;
       width: 240px;
     }
-
-    main {
-      width: 800px;
-    }
-
+    main { width: 800px; }
     #error-btns {
       column-gap: 5px;
       display: flex;
@@ -41,22 +31,12 @@
       margin-top: 30px;
       row-gap: 5px;
     }
-
-    #error-btns>* {
+    #error-btns > * {
       padding: 8px 2px;
       width: 122px;
     }
   </style>
-  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
-  <script>
-    window.TrackJS && TrackJS.install({ 
-      token: "85767f46769046a8aa97448f45866ba9"
-      // for more configuration options, see https://docs.trackjs.com
-    });
-  </script>
-                          
 </head>
-
 <body>
   <main>
     <form>
@@ -93,107 +73,159 @@
       <button>Trigger a Global Error</button>
     </section>
   </main>
-
   <script>
-    class SyntaxError extends Error {
-      constructor(message) {
+    const studentData = {
+      studentId: "S12345",
+      major: "Computer Science",
+      courses: ["Data Structures", "Algorithms", "Web Development"]
+    };
+    const gradesTable = [
+      { course: "Data Structures", grade: "A", credits: 4 },
+      { course: "Algorithms", grade: "B+", credits: 4 },
+      { course: "Web Development", grade: "A-", credits: 4 }
+    ];
+
+    class MathError extends Error {
+      constructor(message, errorCode) {
         super(message);
-        this.name = "SyntaxError";
+        this.name = "MathError";
+        this.errorCode = errorCode;
+        this.timestamp = new Date().toISOString();
       }
     }
 
-    let form = document.querySelector('form');
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
-      let operator = document.querySelector('#operator').value;
-  
-      if (isNaN(firstNum) || isNaN(secondNum)) {
-          throw new SyntaxError('Invalid or unexpected token');
-      }
-      try {
-        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
-      } catch (error) {
-        console.error(error);
-      } finally{
-        console.log("finshed");
-      }
-    });
-
-    let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
-
-    // Start your code here
-    // You may move this JS to another file if you wish
-    let logBtn = errorBtns[0];
-    logBtn.addEventListener('click', () => console.log('Console Log Demo'));
-
-    let errorBtn = errorBtns[1];
-    errorBtn.addEventListener('click', () => console.error('Console Error Demo'));
-
-    let countBtn = errorBtns[2];
-    countBtn.addEventListener('click', () => console.count('Count Button'));
-
-    let warnBtn = errorBtns[3];
-    warnBtn.addEventListener('click', () => console.warn('Console Warn Button'));
-
-    const number = 2;
-    const errorMsg = 'The number does not equal 3';
-    let assertBtn = errorBtns[4];
-    assertBtn.addEventListener('click', () => console.assert(number == 3, {number, errorMsg}));
-
-    let clearBtn = errorBtns[5];
-    clearBtn.addEventListener('click', () => console.clear());
-
-    let dirBtn = errorBtns[6];
-    dirBtn.addEventListener('click', () => console.dir(dirBtn));
-
-    let dirxmlBtn = errorBtns[7];
-    dirxmlBtn.addEventListener('click', () => console.dirxml(dirxmlBtn));
-
-    let groupStartBtn = errorBtns[8];
-    groupStartBtn.addEventListener('click', () => {
-      console.group('console.group');
-    });
-
-    let groupEndBtn = errorBtns[9];
-    groupEndBtn.addEventListener('click', () => console.groupEnd());
-
-    let tableBtn = errorBtns[10];
-    tableBtn.addEventListener('click', () => console.table([{ name: 'math', num: 150 }, { name: 'cse110', num: 110 }]));
-
-    let startTimerBtn = errorBtns[11];
-    startTimerBtn.addEventListener('click', () => console.time('Timer Button'));
-
-    let endTimerBtn = errorBtns[12];
-    endTimerBtn.addEventListener('click', () => console.timeEnd('Timer Button'));
-
-    
-    let traceBtn = errorBtns[13];
-    traceBtn.addEventListener('click', function handleBtnClick(){deep();});
-    
-    function deep() {
-      function deeper() {
-        function deepest() {
-          console.trace('console.trace');
-        }
-        deepest();
-      }
-      deeper();
-    }
-    
-    let globalErrorBtn = errorBtns[14];
-    globalErrorBtn.addEventListener('click', () => {
-      throw new ReferenceError('Trigger a Global Error');
-    });
-
-    window.onerror = function() {
-      console.log("Error");
-      TrackJS.track('Testing TrackJS!');
+    window.onerror = function (message, source, lineno, colno, error) {
+      const errorMsg = `Uncaught Error: ${message} in ${source} at line ${lineno}:${colno}`;
+      console.error(errorMsg);
+      TrackJS.track(error || errorMsg);
+      return true;
     };
 
+    function calculate(num1, num2, operator) {
+      switch (operator) {
+        case "+": return num1 + num2;
+        case "-": return num1 - num2;
+        case "*":
+          if (num1 < 0 || num2 < 0) {
+            throw new MathError("Multiplication with negative numbers not allowed", 403);
+          }
+          return num1 * num2;
+        case "/":
+          if (num2 === 0) {
+            throw new MathError("Cannot divide by zero", 400);
+          }
+          return num1 / num2;
+        default:
+          throw new MathError("Unsupported operator", 400);
+      }
+    }
+
+    // Form Submission
+    const calcForm = document.querySelector('form');
+    calcForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const output = document.querySelector('output');
+      const num1Input = document.querySelector('#first-num').value;
+      const num2Input = document.querySelector('#second-num').value;
+      const op = document.querySelector('#operator').value;
+
+      try {
+        // Input validation
+        if (num1Input === "" || num2Input === "") {
+          throw new MathError("Input fields cannot be empty", 400);
+        }
+        const num1 = parseFloat(num1Input);
+        const num2 = parseFloat(num2Input);
+        if (isNaN(num1) || isNaN(num2)) {
+          throw new MathError("Inputs must be valid numbers", 400);
+        }
+        const result = calculate(num1, num2, op);
+        output.innerHTML = result;
+      } catch (error) {
+        console.error(`[${error.name}] ${error.message} (Code: ${error.errorCode}, Time: ${error.timestamp})`);
+        output.innerHTML = `Error: ${error.message}`;
+        TrackJS.track(error);
+      } finally {
+        console.log("Calculator operation attempted.");
+      }
+    });
+
+    // Console Button Handlers
+    const buttons = Array.from(document.querySelectorAll('#error-btns > button'));
+
+    buttons[0].addEventListener('click', () => {
+      console.log("Student Profile:", studentData);
+    });
+
+    buttons[1].addEventListener('click', () => {
+      console.error("Error: Invalid calculator operation detected!");
+    });
+
+    buttons[2].addEventListener('click', () => {
+      console.count("Calculator Button Interactions");
+    });
+
+    buttons[3].addEventListener('click', () => {
+      console.warn("Warning: Ensure inputs are valid numbers!");
+    });
+
+    buttons[4].addEventListener('click', () => {
+      const isValid = false;
+      console.assert(isValid, "Assertion failed: Invalid calculator state");
+    });
+
+    buttons[5].addEventListener('click', () => {
+      console.clear();
+    });
+
+    buttons[6].addEventListener('click', () => {
+      console.dir(studentData);
+    });
+
+    buttons[7].addEventListener('click', () => {
+      console.dirxml(document.querySelector('form'));
+    });
+
+    buttons[8].addEventListener('click', () => {
+      console.group("Calculator State");
+      console.log("Input 1:", document.querySelector('#first-num').value);
+      console.log("Operator:", document.querySelector('#operator').value);
+      console.log("Input 2:", document.querySelector('#second-num').value);
+    });
+
+    buttons[9].addEventListener('click', () => {
+      console.groupEnd();
+    });
+
+    buttons[10].addEventListener('click', () => {
+      console.table(gradesTable);
+    });
+
+    buttons[11].addEventListener('click', () => {
+      console.time("MathOperation");
+      for (let i = 0; i < 50000; i++) {}
+    });
+
+    buttons[12].addEventListener('click', () => {
+      console.timeEnd("MathOperation");
+    });
+
+    buttons[13].addEventListener('click', () => {
+      function processInput() {
+        function validateInput() {
+          function logTrace() {
+            console.trace("Trace from input processing");
+          }
+          logTrace();
+        }
+        validateInput();
+      }
+      processInput();
+    });
+
+    buttons[14].addEventListener('click', () => {
+      nonExistentObject.propertyAccess;
+    });
   </script>
 </body>
-
 </html>
